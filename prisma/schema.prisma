@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  email String @unique
+  role String
+}
+
+model Feature {
+  id Int @id @default(autoincrement())
+  key String @unique
+  isEnabled Boolean @default(false)
+
+  rules FeatureRule[] @relation("FeatureToRules")
+  experiments Experiment[] @relation("FeatureToExperiments")
+}
+
+model FeatureRule {
+  id Int @id @default(autoincrement())
+  feature Feature @relation("FeatureToRules", fields: [feature_id], references: [id])
+  feature_id Int
+
+  type String
+  config Json
+  priority Int @default(0)
+}
+
+model Experiment {
+  id Int @id @default(autoincrement())
+  key String @unique
+  feature Feature @relation("FeatureToExperiments", fields: [feature_id], references: [id])
+  feature_id Int
+
+  variants ExperimentVariant[] @relation("ExperimentToVariants")
+  assignments ExperimentAssignment[]
+}
+
+model ExperimentVariant {
+  id Int @id @default(autoincrement())
+  experiment Experiment @relation("ExperimentToVariants", fields: [experiment_id], references: [id])
+  experiment_id Int
+  key String //A or B
+  percentage Int @db.SmallInt
+  payload Json?
+
+  assignments ExperimentAssignment[]
+}
+
+model ExperimentAssignment {
+  id Int @id @default(autoincrement())
+
+  userId Int
+
+  experimentId Int
+  experiment Experiment @relation(fields: [experimentId], references: [id])
+
+  variantId Int
+  variant ExperimentVariant @relation(fields: [variantId], references: [id])
+
+  assignedAt DateTime @default(now())
+
+  @@unique([userId, experimentId])
+}
