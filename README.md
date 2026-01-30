@@ -73,8 +73,6 @@ POST /api/feature
     "key": "new-dashboard",
     "isEnabled": true
 }
-
-
 ```
 
 ### Add Feature Rule
@@ -124,7 +122,7 @@ POST /api/experiment/dashboard_experiment/variants
 
 ### Evaluate Feature With Experiment
 ```http
-POST /api/feature/new-dashboard/evaluate?userId=73&role=admin
+GET /api/feature/new-dashboard/evaluate?userId=73&role=admin
 
 {
     "enabled": true,
